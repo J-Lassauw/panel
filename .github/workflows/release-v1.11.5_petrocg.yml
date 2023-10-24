@@ -30,7 +30,23 @@ jobs:
       - name: Run composer install if composer.json exists
         if: steps.check_files.outputs.files_exists == 'true'
         run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
+      
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: "yarn"
+          
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
+      - name: Build
+        run: yarn build:production
+        
+      - name: Create release archive
+        run: |
+          rm -rf node_modules tests CODE_OF_CONDUCT.md CONTRIBUTING.md flake.lock flake.nix phpunit.xml shell.nix 
+          
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
 
